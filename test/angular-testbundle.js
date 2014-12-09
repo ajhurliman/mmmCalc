@@ -5,13 +5,15 @@ require("./../../bower_components/angular/angular");
 
 var mmmApp = angular.module('mmmApp', []);
 
+require('./calc/services/calculate-service')(mmmApp);
 require('./calc/controllers/calc-controller')(mmmApp);
 
-},{"./../../bower_components/angular/angular":4,"./calc/controllers/calc-controller":2}],2:[function(require,module,exports){
+},{"./../../bower_components/angular/angular":5,"./calc/controllers/calc-controller":2,"./calc/services/calculate-service":3}],2:[function(require,module,exports){
 'use strict';
 
 module.exports = function(app) {
-  app.controller('calcCtrl', ['$scope', '$http', function($scope, $http) {
+  app.controller('calcCtrl', ['calcFactory', '$scope', function(calcFactory, $scope) {
+    var calcService = new calcFactory();
     $scope.mmmCalc = function() {
 
       //parse the user's input into array of numbers
@@ -20,33 +22,72 @@ module.exports = function(app) {
       for(var i = 0; i < arrLength; i++) {
         numArray[i] = parseInt(numArray[i], 10);
       }
-      var params = {"numArray": numArray};
-      console.log(params);
 
-      //send a get request to the server with the array
-      $http({
-        method: 'POST',
-        url: '/api/calculate',
-        data: params
-      })
-      .success(function(data) {
-        //$httpBackend was sending me a 1-member array for some reason
-        //so this line takes care of it
-        data = data[0] || data;
-
-        $scope.mean = data.mean;
-        $scope.median = data.median;
-        $scope.mode = data.mode;
-      })
-      .error(function(data, status) {
-        console.log('fail!');
-        console.log(data);
-      });
+      $scope.mean = calcService.mean(numArray);
+      $scope.median = calcService.median(numArray);
+      $scope.mode = calcService.mode(numArray);
     };
   }]);
 };
 
 },{}],3:[function(require,module,exports){
+'use strict';
+var mmm = require('../../../../lib/mean_median_mode');
+
+module.exports = function(app) {
+
+  app.factory('calcFactory', function() {
+    return function() {
+      return {
+        mean: function(numList) {
+          var sum = 0;
+          console.log('server module, mmm: ' + numList);
+          for (var i = 0; i<numList.length; i++) {
+            sum += numList[i];
+          }
+          return sum/numList.length;
+        },
+
+        median: function(numList) {
+          if (numList.length%2 !== 0) {
+            var midNum = Math.floor(numList.length/2);
+            return numList[midNum];
+          } else {
+            var highMidNum =(numList.length/2);
+            var lowMidNum = (numList.length/2 - 1);
+            return ((numList[highMidNum] + numList[lowMidNum])/2);
+          }
+        },
+
+        mode: function(numList) {
+          var numCount = {};
+
+          //starts each of the counters at 0
+          for (var i = 0; i<numList.length; i++) {
+            numCount[numList[i]]=0;
+          }
+
+          for (i = 0; i<numList.length; i++) {
+            var instance = numList[i];
+            numCount[instance]++;
+          }
+
+          var numOfInstances = 0;
+          var numToReturn;
+          for (var key in numCount) {
+            if (numCount[key] > numOfInstances) {
+              numOfInstances = numCount[key];
+              numToReturn = key;
+            }
+          }
+          return +numToReturn;
+        }
+      };
+    };
+  });
+};
+
+},{"../../../../lib/mean_median_mode":6}],4:[function(require,module,exports){
 /**
  * @license AngularJS v1.3.5
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -2428,7 +2469,7 @@ if (window.jasmine || window.mocha) {
 
 })(window, window.angular);
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /**
  * @license AngularJS v1.3.5
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -28346,7 +28387,62 @@ var styleDirective = valueFn({
 })(window, document);
 
 !window.angular.$$csp() && window.angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}</style>');
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+//written by ajHurliman for CodeFellows week1 homework on 10-29-14
+//
+//This module makes the mean, median and mode functions available
+'use strict';
+
+var MeanMedianMode = function() {
+  this.mean = function(numList) {
+    var sum = 0;
+    console.log('server module, mmm: ' + numList);
+    for (var i = 0; i<numList.length; i++) {
+      sum += numList[i];
+    }
+    return sum/numList.length;
+  };
+
+  this.median = function(numList) {
+    if (numList.length%2 !== 0) {
+      var midNum = Math.floor(numList.length/2);
+      return numList[midNum];
+    } else {
+      var highMidNum =(numList.length/2);
+      var lowMidNum = (numList.length/2 - 1);
+      return ((numList[highMidNum] + numList[lowMidNum])/2);
+    }
+  };
+
+  this.mode = function(numList) {
+    var numCount = {};
+
+    //starts each of the counters at 0
+    for (var i = 0; i<numList.length; i++) {
+      numCount[numList[i]]=0;
+    }
+
+    for (i = 0; i<numList.length; i++) {
+      var instance = numList[i];
+      numCount[instance]++;
+    }
+
+    var numOfInstances = 0;
+    var numToReturn;
+    for (var key in numCount) {
+      if (numCount[key] > numOfInstances) {
+        numOfInstances = numCount[key];
+        numToReturn = key;
+      }
+    }
+    return +numToReturn;
+  };
+};
+
+var mmm = new MeanMedianMode();
+module.exports = mmm;
+
+},{}],7:[function(require,module,exports){
 'use strict';
 
 require('../../app/js/app');
@@ -28354,7 +28450,6 @@ require("./../../bower_components/angular-mocks/angular-mocks.js");
 
 describe('mean median mode angular interface', function() {
   var $controllerConstructor;
-  var $httpBackend;
   var $scope;
 
   beforeEach(angular.mock.module('mmmApp'));
@@ -28369,51 +28464,13 @@ describe('mean median mode angular interface', function() {
     expect(typeof calcController).toBe('object');
   });
 
-  describe('rest request', function() {
-    beforeEach(angular.mock.inject(function(_$httpBackend_) {
-      $httpBackend = _$httpBackend_;
-    }));
+  it('should test the calculate service', function() {
+    $controllerConstructor('calcCtrl', {$scope: $scope});
+    $scope.inputArray = '4 4 7';
+    $scope.mmmCalc();
 
-    afterEach(function() {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
-    });
-
-    it('should calculate mean/median/mode', function() {
-      $scope.inputArray = '4 4 7';
-      $httpBackend.expectPOST('/api/calculate').respond(200, [{'mean': 5, 'median': 4, 'mode': 4}]);
-      $controllerConstructor('calcCtrl', {$scope: $scope});
-      $scope.mmmCalc();
-      $httpBackend.flush();
-      console.log($scope.mean);
-      expect($scope.mean).toBe(5);
-      expect($scope.median).toBe(4);
-      expect($scope.mode).toBe(4);
-    });
+    expect($scope.mean).toBeDefined();
   });
-
-
-//begin old code
-  // it('should calculate mean/median/mode', {
-  //     angular.mock.inject(function(_$httpBackend_) {
-  //       $httpBackend = _$httpBackend_;
-  //     }
-  //     $httpBackend = _$httpBackend_;
-  //     $scope.inputArray = '4 4 7';
-  //     $httpBackend.expectPOST('/api/calculate').respond(200, [{'mean': 5, 'median': 4, 'mode': 4}]);
-
-  //     $controllerConstructor('calcCtrl', {$scope: $scope});
-  //     $scope.mmmCalc();
-
-  //     $httpBackend.flush();
-
-  //     expect($scope.mean).toBeDefined();
-  //     expect($scope.median).toBe(4);
-  //     expect($scope.mode).toBe(4);
-
-  //     $httpBackend.verifyNoOutstandingExpectation();
-  //     $httpBackend.verifyNoOutstandingRequest();
-  // }));
 });
 
-},{"../../app/js/app":1,"./../../bower_components/angular-mocks/angular-mocks.js":3}]},{},[5]);
+},{"../../app/js/app":1,"./../../bower_components/angular-mocks/angular-mocks.js":4}]},{},[7]);

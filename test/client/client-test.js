@@ -5,7 +5,6 @@ require('angular-mocks');
 
 describe('mean median mode angular interface', function() {
   var $controllerConstructor;
-  var $httpBackend;
   var $scope;
 
   beforeEach(angular.mock.module('mmmApp'));
@@ -20,26 +19,11 @@ describe('mean median mode angular interface', function() {
     expect(typeof calcController).toBe('object');
   });
 
-  describe('rest request', function() {
-    beforeEach(angular.mock.inject(function(_$httpBackend_) {
-      $httpBackend = _$httpBackend_;
-    }));
+  it('should test the calculate service', function() {
+    $controllerConstructor('calcCtrl', {$scope: $scope});
+    $scope.inputArray = '4 4 7';
+    $scope.mmmCalc();
 
-    afterEach(function() {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
-    });
-
-    it('should calculate mean/median/mode', function() {
-      $scope.inputArray = '4 4 7';
-      $httpBackend.expectPOST('/api/calculate').respond(200, [{'mean': 5, 'median': 4, 'mode': 4}]);
-      $controllerConstructor('calcCtrl', {$scope: $scope});
-      $scope.mmmCalc();
-      $httpBackend.flush();
-
-      expect($scope.mean).toBe(5);
-      expect($scope.median).toBe(4);
-      expect($scope.mode).toBe(4);
-    });
+    expect($scope.mean).toBeDefined();
   });
 });
