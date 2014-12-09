@@ -5,13 +5,13 @@ module.exports = function(app) {
     $scope.mmmCalc = function() {
 
       //parse the user's input into array of numbers
-      var numArray = $scope.numSet.inputArray.split(" ");
-      console.log(numArray);
+      var numArray = $scope.inputArray.split(" ");
       var arrLength = numArray.length;
       for(var i = 0; i < arrLength; i++) {
         numArray[i] = parseInt(numArray[i], 10);
       }
       var params = {"numArray": numArray};
+      console.log(params);
 
       //send a get request to the server with the array
       $http({
@@ -20,12 +20,16 @@ module.exports = function(app) {
         data: params
       })
       .success(function(data) {
+        //$httpBackend was sending me a 1-member array for some reason
+        //so this line takes care of it
+        data = data[0] || data;
 
-        $scope.numSet.mean = data.mean;
-        $scope.numSet.median = data.median;
-        $scope.numSet.mode = data.mode;
+        $scope.mean = data.mean;
+        $scope.median = data.median;
+        $scope.mode = data.mode;
       })
       .error(function(data, status) {
+        console.log('fail!');
         console.log(data);
       });
     };

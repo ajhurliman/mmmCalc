@@ -6,7 +6,7 @@ chai.use(chaihttp);
 
 var expect = chai.expect;
 
-require('../server');
+require('../../server');
 
 describe('mean median and mode api', function() {
   it('should test mean the mean', function(done) {
