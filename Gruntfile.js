@@ -51,7 +51,7 @@ module.exports = function(grunt) {
       },
 
       test: {
-        src: ['test/client/client-test.js'],
+        src: ['test/client/service-test.js'],
         dest: 'test/angular-testbundle.js',
         options: {
           transform: ['debowerify']

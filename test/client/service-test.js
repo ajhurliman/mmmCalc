@@ -3,16 +3,16 @@
 require('../../app/js/app');
 require('angular-mocks');
 
-describe('resource service', function() {
+describe('calculate service', function() {
   beforeEach(angular.mock.module('mmmApp'));
-  var service;
+  var Service;
   var $httpBackend;
   var calcService;
 
-  beforeEach(angular.mock.inject(function(resourceService, _$httpBackend_) {
-    service = resourceService;
+  beforeEach(angular.mock.inject(function(calcFactory, _$httpBackend_) {
+    Service = calcFactory;
     $httpBackend = _$httpBackend_;
-    calcService = new Service('calc'); //make this the same as whatever I name the service
+    calcService = new Service();
   }));
 
   afterEach(function() {
@@ -20,10 +20,14 @@ describe('resource service', function() {
     $httpBackend.verifyNoOutstandingRequest();
   });
 
-  it('should be able to post request to calc', function() {
-    $httpBackend.expectPOST('/api/calc').respond(200,[]);
+  it('should be able to calculate mean median and mode', function() {
+    $httpBackend.expectPOST('/api/calculate').respond(200,{mean: 5, median: 4, mode: 4});
 
-    var promise = calcService.index();
+    var promise = calcService.calculate([4, 4, 7]);
+
+    promise.success(function(data) {
+      expect(data).toEqual(jasmine.objectContaining({mean: 5}));
+    });
 
     $httpBackend.flush();
   });
