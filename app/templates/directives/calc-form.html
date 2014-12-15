@@ -1,0 +1,17 @@
+<div data-ng-controller="calcCtrl">
+
+  <label for="inputs">Type in some numbers separated by spaces</label>
+
+  <input type="text" data-ng-model="numSet.inputArray">
+
+  <button data-ng-click="mmmCalc()">Recalculate!</button>
+
+  <br> <br>
+
+  Mean: {{numSet.mean}}
+  <br>
+  Median: {{numSet.median}}
+  <br>
+  Mode: {{numSet.mode}}
+
+</div>

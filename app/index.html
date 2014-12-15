@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mean Median Mode</title>
+</head>
+<body>
+  <div data-ng-app="mmmApp">
+    <div data-ng-controller="calcCtrl">
+
+      <label for="inputs">Type in some numbers separated by spaces</label>
+
+      <input type="text" data-ng-model="inputArray">
+
+      <button data-ng-click="mmmCalc()">Recalculate!</button>
+
+      <br> <br>
+
+      Mean: {{mean}}
+      <br>
+      Median: {{median}}
+      <br>
+      Mode: {{mode}}
+
+    </div>
+  </div>
+
+  <script src="../build/bundle.js"></script>
+</body>
+</html>
